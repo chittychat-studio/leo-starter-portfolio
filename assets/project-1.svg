@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-label="Tidewater placeholder">
+  <rect width="960" height="600" fill="#0f3b40"/>
+  <circle cx="720" cy="170" r="70" fill="#f2c27b"/>
+  <path d="M0 300 C 120 250 240 350 360 300 S 600 250 720 300 S 900 350 960 310 V600 H0z" fill="#17565c"/>
+  <path d="M0 370 C 120 320 240 420 360 370 S 600 320 720 370 S 900 420 960 380 V600 H0z" fill="#1f7078"/>
+  <path d="M0 440 C 120 390 240 490 360 440 S 600 390 720 440 S 900 490 960 450 V600 H0z" fill="#2a8a91"/>
+  <path d="M0 510 C 120 460 240 560 360 510 S 600 460 720 510 S 900 560 960 520 V600 H0z" fill="#e9dfd2"/>
+</svg>

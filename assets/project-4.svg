@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-label="Kindred UI placeholder">
+  <rect width="960" height="600" fill="#1f1a16"/>
+  <g transform="translate(180 90)">
+    <rect x="0" y="0" width="120" height="120" rx="14" fill="#e9dfd2"/>
+    <circle cx="210" cy="60" r="60" fill="#c9542b"/>
+    <path d="M300 120 A120 120 0 0 1 420 0 V120z" fill="#f2c27b"/>
+    <rect x="480" y="0" width="120" height="120" rx="60" fill="#2a8a91"/>
+    <path d="M0 300 A120 120 0 0 1 120 180 V300z" fill="#2a8a91"/>
+    <rect x="150" y="180" width="120" height="120" rx="14" fill="#f2c27b"/>
+    <circle cx="360" cy="240" r="60" fill="#e9dfd2"/>
+    <rect x="480" y="180" width="120" height="120" rx="14" fill="#c9542b"/>
+    <rect x="0" y="360" width="270" height="60" rx="30" fill="#c9542b"/>
+    <rect x="300" y="360" width="120" height="60" rx="14" fill="#e9dfd2"/>
+    <circle cx="540" cy="390" r="30" fill="#f2c27b"/>
+  </g>
+</svg>

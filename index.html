@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio</title>
+  <meta name="description" content="Personal portfolio">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    /* Set the theme before the page paints, so there is no flash. */
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("leo-theme"); } catch (e) {}
+      var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", saved || (dark ? "dark" : "light"));
+    })();
+  </script>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav container" aria-label="Main">
+      <a class="brand" href="#top" aria-label="Back to top"><span data-bind="person.initials"></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+        <span class="sr-only">Menu</span>
+        <span class="menu-bar" aria-hidden="true"></span>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Work</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-name">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <h1 class="hero-name" id="hero-name"></h1>
+          <p class="hero-role"><span data-bind="person.role"></span><span class="hero-sep" aria-hidden="true"></span><span data-bind="person.location"></span></p>
+          <p class="hero-tagline" data-bind="person.tagline"></p>
+          <div class="hero-ctas" id="hero-ctas"></div>
+        </div>
+        <div class="hero-stage" id="hero-stage" aria-hidden="true">
+          <!-- Static artwork. Shown when WebGL is off, reduced motion is on,
+               or the page is opened straight from disk. -->
+          <svg class="hero-fallback" viewBox="0 0 400 400">
+            <g stroke="currentColor" stroke-width="1.2" stroke-linejoin="round">
+              <polygon class="f1" points="200,40 318,118 200,160"/>
+              <polygon class="f2" points="200,40 82,118 200,160"/>
+              <polygon class="f3" points="82,118 200,160 120,268"/>
+              <polygon class="f4" points="318,118 200,160 280,268"/>
+              <polygon class="f5" points="200,160 120,268 280,268"/>
+              <polygon class="f6" points="82,118 120,268 64,220"/>
+              <polygon class="f7" points="318,118 280,268 336,220"/>
+              <polygon class="f8" points="120,268 280,268 200,360"/>
+              <polygon class="f9" points="64,220 120,268 200,360"/>
+              <polygon class="f10" points="336,220 280,268 200,360"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="container about-grid">
+        <h2 class="section-title" id="about-title" data-bind="about.heading"></h2>
+        <div class="about-body">
+          <div class="about-text" id="about-text"></div>
+          <h3 class="minor-title" data-bind="about.skillsHeading"></h3>
+          <ul class="skills" id="skills"></ul>
+        </div>
+        <figure class="about-portrait">
+          <img id="avatar" alt="" width="320" height="400">
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title" id="projects-title" data-bind="projects.heading"></h2>
+          <p class="section-intro" data-bind="projects.intro"></p>
+        </div>
+        <ol class="projects" id="project-list"></ol>
+      </div>
+    </section>
+
+    <section class="section" id="experience" aria-labelledby="experience-title">
+      <div class="container exp-grid">
+        <h2 class="section-title" id="experience-title" data-bind="experience.heading"></h2>
+        <ol class="timeline" id="timeline">
+          <li class="timeline-track" aria-hidden="true"><span class="timeline-fill"></span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <h2 class="section-title" id="contact-title" data-bind="contact.heading"></h2>
+        <p class="contact-text" data-bind="contact.text"></p>
+        <a class="contact-email" id="mailto"><span data-bind="person.email"></span></a>
+        <div class="contact-actions">
+          <button class="btn btn-ghost" type="button" id="copy-email">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+            <span>Copy email address</span>
+          </button>
+          <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>&copy; <span id="year"></span> <span data-bind="person.name"></span>. <span data-bind="footer.note"></span></p>
+      <ul class="social" id="social"></ul>
+    </div>
+  </footer>
+
+  <noscript><p class="noscript">This site needs JavaScript to load its content from content.js.</p></noscript>
+
+  <script src="content.js"></script>
+  <script src="vendor/gsap/gsap.min.js"></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-label="Fieldnotes placeholder">
+  <rect width="960" height="600" fill="#4b5a3a"/>
+  <g transform="translate(480 300)">
+    <rect x="-200" y="-150" width="400" height="300" rx="14" fill="#2f3a24" transform="rotate(-9)"/>
+    <rect x="-200" y="-150" width="400" height="300" rx="14" fill="#c7b98f" transform="rotate(-3)"/>
+    <rect x="-200" y="-150" width="400" height="300" rx="14" fill="#f3ecdc" transform="rotate(4)"/>
+    <g transform="rotate(4)" stroke="#8a7f62" stroke-width="3" stroke-linecap="round">
+      <path d="M-150 -90 H120"/><path d="M-150 -50 H150"/><path d="M-150 -10 H90"/><path d="M-150 30 H140"/><path d="M-150 70 H60"/>
+    </g>
+    <circle cx="150" cy="95" r="22" fill="#c9542b" transform="rotate(4)"/>
+  </g>
+</svg>

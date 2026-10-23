@@ -1,0 +1,43 @@
+{
+  "name": "leo-starter-portfolio",
+  "title": "Leo's starter: Portfolio",
+  "description": "A personal portfolio site with a three.js hero, GSAP scroll motion, light and dark themes, and all content in one file.",
+  "version": "1.0.0",
+  "license": "MIT (template code). Vendored GSAP uses the Standard No Charge GSAP License, see NOTICE.md.",
+  "author": "Cardzo",
+  "stack": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "three.js 0.186.1",
+    "GSAP 3.15.0 + ScrollTrigger"
+  ],
+  "buildStep": false,
+  "entry": "index.html",
+  "editFile": "content.js",
+  "features": [
+    "Hero, about, selected work, experience timeline, contact and footer sections",
+    "3D low-poly hero that reacts to pointer and scroll, lazy loaded, capped pixel ratio, paused off screen",
+    "Static artwork fallback when WebGL is missing, reduced motion is on, or the page is opened from disk",
+    "GSAP intro and ScrollTrigger section motion with a reduced-motion path",
+    "CSS scroll-driven reading progress bar as progressive enhancement",
+    "Light and dark themes that follow the system setting",
+    "Active nav highlight, smooth anchor scrolling, mobile menu",
+    "mailto link and copy-email button, no backend",
+    "Self-hosted fonts, no trackers, no external requests"
+  ],
+  "demo": {
+    "local": "python -m http.server 8000, then open http://localhost:8000",
+    "quick": "Double-click index.html (3D hero shows its static fallback from disk)",
+    "screenshots": [
+      "docs/desktop-light.png",
+      "docs/desktop-dark.png",
+      "docs/phone-light.png"
+    ]
+  },
+  "deploy": [
+    "GitHub Pages",
+    "Cloudflare Pages",
+    "Netlify"
+  ]
+}
