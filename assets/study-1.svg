@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Study one placeholder">
+  <rect width="800" height="1000" fill="#e9dfd2"/>
+  <rect x="80" y="120" width="640" height="420" rx="18" fill="#0f3b40"/>
+  <rect x="120" y="160" width="250" height="28" rx="6" fill="#f2c27b"/>
+  <rect x="120" y="210" width="400" height="14" rx="5" fill="#2a8a91"/>
+  <rect x="120" y="240" width="340" height="14" rx="5" fill="#2a8a91"/>
+  <rect x="120" y="300" width="180" height="200" rx="12" fill="#17565c"/>
+  <rect x="320" y="300" width="180" height="200" rx="12" fill="#1f7078"/>
+  <rect x="520" y="300" width="160" height="200" rx="12" fill="#2a8a91"/>
+  <circle cx="400" cy="760" r="140" fill="#d9643a"/>
+  <circle cx="400" cy="760" r="80" fill="#e9dfd2"/>
+</svg>

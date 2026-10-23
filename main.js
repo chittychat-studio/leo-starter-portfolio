@@ -1,6 +1,8 @@
 /*
   main.js: renders content.js into the page and adds the interactions
-  (theme toggle, mobile menu, GSAP motion, 3D hero, active nav, copy email).
+  (theme toggle, mobile menu, story, horizontal work rail, gallery,
+  project pages, custom cursor, 3D hero, active nav, copy email).
+  Authored motion lives in motion.js. No animation library: browser APIs only.
   Original code for Leo's starter. MIT licence, see LICENSE.
 */
 (function () {
@@ -99,38 +101,77 @@
   (get("about.skills") || []).forEach(function (s) { skills.appendChild(el("li", { text: s })); });
   var avatar = document.getElementById("avatar");
   if (get("person.avatar")) {
+    // A missing or broken image hides the portrait instead of showing a broken icon.
+    avatar.addEventListener("error", function () { avatar.parentElement.hidden = true; });
     avatar.src = get("person.avatar");
     avatar.alt = "Portrait of " + (get("person.name") || "the site owner");
   } else {
     avatar.parentElement.hidden = true;
   }
 
-  /* ---------- projects ---------- */
-  var list = document.getElementById("project-list");
-  (get("projects.items") || []).forEach(function (p) {
-    var links = el("div", { className: "project-links" });
-    if (isSafeUrl(p.live)) links.appendChild(link(p.live, "Live site", "project-link", true));
-    if (isSafeUrl(p.code)) links.appendChild(link(p.code, "Source code", "project-link", true));
+  /* ---------- story (pinned "how I work") ---------- */
+  var chapters = get("story.chapters") || [];
+  var storyFrame = document.getElementById("story-frame");
+  var storySteps = document.getElementById("story-steps");
+  chapters.forEach(function (c, i) {
+    if (c.image) {
+      storyFrame.appendChild(el("img", { src: c.image, alt: "", width: "800", height: "1000", className: storyFrame.children.length ? "" : "is-active", "data-step": String(i) }));
+    }
+    var step = el("li", { className: "story-step" + (i === 0 ? " is-active" : ""), "data-step": String(i) }, [
+      el("h3", { className: "story-step-title", text: c.title }),
+      el("p", { className: "story-step-text", text: c.text }),
+      c.image ? el("img", { className: "story-step-media", src: c.image, alt: c.imageAlt || "", loading: "lazy", width: "800", height: "1000" }) : null
+    ]);
+    storySteps.appendChild(step);
+  });
+  var storyProgress = document.getElementById("story-progress");
+  chapters.forEach(function (c, i) { storyProgress.appendChild(el("span", { className: i === 0 ? "is-on" : "" })); });
+  if (!chapters.length) document.getElementById("story").hidden = true;
 
+  /* ---------- projects (horizontal rail cards) ---------- */
+  var projectItems = (get("projects.items") || []).filter(function (p) { return p && p.title; });
+  projectItems.forEach(function (p, i) {
+    if (!p.slug) p.slug = String(p.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    p.slug = String(p.slug).toLowerCase();
+    p._index = i;
+  });
+  var list = document.getElementById("project-list");
+  projectItems.forEach(function (p, i) {
     var tags = el("ul", { className: "tags", "aria-label": "Built with" });
     (p.tags || []).forEach(function (t) { tags.appendChild(el("li", { text: t })); });
-
-    var media = el("div", { className: "project-media" });
-    if (p.image) {
-      media.appendChild(el("img", { src: p.image, alt: p.imageAlt || "", loading: "lazy", width: "960", height: "600" }));
-    }
-
-    list.appendChild(el("li", { className: "project" }, [
-      media,
-      el("div", { className: "project-body" }, [
-        p.year ? el("p", { className: "project-meta", text: p.year }) : null,
-        el("h3", { className: "project-title", text: p.title }),
-        el("p", { className: "project-text", text: p.description }),
-        tags,
-        links.children.length ? links : null
+    // No image: the card leads with its title instead of an empty box.
+    var media = p.image ? el("div", { className: "rail-media" }, [
+      el("img", { src: p.image, alt: p.imageAlt || "", loading: "lazy", width: "960", height: "600", "data-slug": p.slug })
+    ]) : null;
+    list.appendChild(el("li", { className: "rail-card" }, [
+      el("a", { className: "rail-link", href: "#/work/" + p.slug, "data-cursor": "View" }, [
+        media,
+        el("p", { className: "rail-meta" }, [
+          p.year ? el("span", { text: p.year }) : null,
+          p.role ? el("span", { text: p.role }) : null
+        ]),
+        el("h3", { className: "rail-title", text: p.title }),
+        el("p", { className: "rail-text", text: p.description }),
+        tags
       ])
     ]));
   });
+
+  /* ---------- gallery ---------- */
+  var galleryGrid = document.getElementById("gallery-grid");
+  var galleryItems = get("gallery.items") || [];
+  galleryItems.forEach(function (g) {
+    var tall = g.shape === "tall";
+    galleryGrid.appendChild(el("li", { className: "gallery-item " + (tall ? "is-tall" : "is-wide") }, [
+      el("figure", { className: "reveal-media" }, [
+        el("div", { className: "reveal-frame" }, [
+          el("img", { src: g.src, alt: g.alt || "", loading: "lazy", width: tall ? "800" : "960", height: tall ? "1000" : "600" })
+        ]),
+        g.caption ? el("figcaption", { text: g.caption }) : null
+      ])
+    ]));
+  });
+  if (!galleryItems.length) document.getElementById("gallery").hidden = true;
 
   /* ---------- experience ---------- */
   var timeline = document.getElementById("timeline");
@@ -256,64 +297,296 @@
     window.addEventListener("scroll", function () { if (window.scrollY < 80) setActive(""); }, { passive: true });
   }
 
-  /* ---------- motion (GSAP + ScrollTrigger) ----------
-     Content is visible by default. GSAP only animates *from* a start state,
-     so if a script fails to load the page still reads normally. */
-  var gsap = window.gsap;
-  if (gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(window.ScrollTrigger);
-    var mm = gsap.matchMedia();
+  /* ---------- reveal on scroll (native, no library) ----------
+     Sections and images start hidden only when html.motion-ok is set,
+     so with JavaScript off or reduced motion on, everything is visible.
+     Only opacity, transform and clip-path change: no layout shift. */
+  var noop = function () {};
+  var M = window.LeoMotion || { ready: false, intro: noop, scrubFill: noop };
+  var canObserve = "IntersectionObserver" in window;
+  function syncMotionClass() { root.classList.toggle("motion-ok", canObserve && !reduceMotion.matches); }
+  syncMotionClass();
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", syncMotionClass);
 
-    mm.add("(prefers-reduced-motion: no-preference)", function () {
-      // The one authored moment: the name lifts out of its masks, then the rest settles.
-      var intro = gsap.timeline({ defaults: { ease: "expo.out" } });
-      intro
-        .from(".hero-name .word-inner", { yPercent: 115, duration: 1.1, stagger: 0.09 })
-        .from(".hero-role, .hero-tagline, .hero-ctas", { y: 18, autoAlpha: 0, duration: 0.8, stagger: 0.08 }, "-=0.75")
-        .from(".hero-stage", { autoAlpha: 0, scale: 0.92, duration: 1.2 }, 0.1);
-
-      // Project images open from an inset frame as they scroll into view.
-      gsap.utils.toArray(".project").forEach(function (project) {
-        var media = project.querySelector(".project-media");
-        var img = project.querySelector(".project-media img");
-        var body = project.querySelector(".project-body");
-        gsap.fromTo(media,
-          { clipPath: "inset(10% 8% 10% 8% round 14px)" },
-          { clipPath: "inset(0% 0% 0% 0% round 14px)", ease: "none",
-            scrollTrigger: { trigger: project, start: "top 92%", end: "top 35%", scrub: 0.6 } });
-        if (img) {
-          gsap.fromTo(img, { scale: 1.18 }, { scale: 1, ease: "none",
-            scrollTrigger: { trigger: project, start: "top 92%", end: "bottom 30%", scrub: 0.6 } });
-        }
-        gsap.from(body.children, {
-          y: 24, autoAlpha: 0, duration: 0.7, ease: "expo.out", stagger: 0.06,
-          scrollTrigger: { trigger: project, start: "top 75%", once: true }
-        });
-      });
-
-      // The career line fills as you read down the timeline.
-      gsap.fromTo(".timeline-fill", { scaleY: 0 }, {
-        scaleY: 1, ease: "none",
-        scrollTrigger: { trigger: "#timeline", start: "top 70%", end: "bottom 60%", scrub: 0.4 }
-      });
-      gsap.utils.toArray(".timeline-item").forEach(function (item) {
-        gsap.from(item, { x: -16, autoAlpha: 0, duration: 0.6, ease: "expo.out",
-          scrollTrigger: { trigger: item, start: "top 82%", once: true } });
-      });
-
-      // The email address arrives with a gentle blur-to-sharp focus pull.
-      gsap.from(".contact-email", { autoAlpha: 0, filter: "blur(10px)", y: 12, duration: 0.9, ease: "expo.out",
-        scrollTrigger: { trigger: ".contact", start: "top 70%", once: true } });
+  var revealObserver = canObserve ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-in");
+        revealObserver.unobserve(entry.target);
+      }
     });
-
-    mm.add("(prefers-reduced-motion: reduce)", function () {
-      // No movement. A short cross-fade on the hero keeps the arrival legible.
-      gsap.from(".hero-text, .hero-stage", { autoAlpha: 0, duration: 0.4, ease: "power1.out" });
+  }, { rootMargin: "0px 0px -10% 0px", threshold: 0.01 }) : null;
+  function observeReveals(scope) {
+    (scope || document).querySelectorAll("[data-reveal], .reveal-media").forEach(function (n) {
+      if (revealObserver) revealObserver.observe(n);
+      else n.classList.add("is-in");
     });
-
-    // Fonts and lazy images change heights; refresh trigger positions once they settle.
-    window.addEventListener("load", function () { window.ScrollTrigger.refresh(); });
   }
+  [
+    ["#home-view .section-title", 0], ["#home-view .section-intro", 80],
+    ["#home-view .about-body", 80], ["#home-view .about-portrait", 160],
+    ["#home-view .contact-text", 80], ["#home-view .timeline-item", 0],
+    ["#home-view .contact-email", 160]
+  ].forEach(function (pair) {
+    document.querySelectorAll(pair[0]).forEach(function (n) {
+      n.setAttribute("data-reveal", "");
+      if (pair[1]) n.style.setProperty("--reveal-delay", pair[1] + "ms");
+    });
+  });
+  observeReveals(document.getElementById("home-view"));
+
+  /* ---------- authored motion (motion.js: Web Animations API, scroll-driven CSS) ---------- */
+  M.intro();
+  M.scrubFill(document.querySelector(".timeline-fill"), "#timeline");
+
+  /* ---------- pinned story: the active chapter swaps the picture ---------- */
+  function setChapter(i) {
+    // A chapter without a picture keeps the previous one on screen.
+    var hasImage = !!storyFrame.querySelector('img[data-step="' + i + '"]');
+    storySteps.querySelectorAll(".story-step").forEach(function (s) { s.classList.toggle("is-active", s.getAttribute("data-step") === String(i)); });
+    if (hasImage) storyFrame.querySelectorAll("img").forEach(function (img) { img.classList.toggle("is-active", img.getAttribute("data-step") === String(i)); });
+    Array.prototype.forEach.call(storyProgress.children, function (bar, k) { bar.classList.toggle("is-on", k <= i); });
+  }
+  if (canObserve) {
+    var storyObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) setChapter(+entry.target.getAttribute("data-step")); });
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    storySteps.querySelectorAll(".story-step").forEach(function (s) { storyObserver.observe(s); });
+  }
+
+  /* ---------- views (home and project detail) ---------- */
+  var homeView = document.getElementById("home-view");
+  var projectView = document.getElementById("project-view");
+
+  /* ---------- pinned horizontal rail ----------
+     On wide screens with motion allowed, the rail gets a tall outer box and a
+     sticky inner box; vertical scroll progress moves the track sideways.
+     Native scrolling is never hijacked. Everywhere else the track is a normal
+     swipeable row (phones) or a two-column grid (reduced motion). */
+  var rail = document.getElementById("rail");
+  var railSticky = rail.querySelector(".rail-sticky");
+  var track = list;
+  var meter = document.getElementById("rail-meter");
+  var railQuery = window.matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)");
+  var railShift = 0, railTicking = false;
+
+  function railActive() { return railQuery.matches && !homeView.hidden && projectItems.length > 1; }
+  function layoutRail() {
+    if (!railActive()) {
+      root.classList.remove("rail-pinned");
+      rail.style.height = "";
+      track.style.transform = "";
+      return;
+    }
+    root.classList.add("rail-pinned");
+    railShift = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
+    rail.style.height = (railSticky.offsetHeight + railShift) + "px";
+    rail.style.setProperty("--rail-shift", railShift + "px"); // read by the CSS scroll-driven animation
+    updateRail();
+  }
+  function railTravel() { return rail.offsetHeight - railSticky.offsetHeight; }
+  // Browsers with CSS scroll-driven animations move the track in CSS (styles.css);
+  // this handler is the fallback for the rest.
+  var cssRail = !!(window.CSS && CSS.supports && CSS.supports("animation-timeline: view()"));
+  function updateRail() {
+    railTicking = false;
+    if (cssRail || !root.classList.contains("rail-pinned")) return;
+    var travel = railTravel();
+    var p = travel > 0 ? Math.min(1, Math.max(0, -rail.getBoundingClientRect().top / travel)) : 0;
+    track.style.transform = "translate3d(" + (-p * railShift).toFixed(1) + "px, 0, 0)";
+    meter.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  }
+  window.addEventListener("scroll", function () {
+    if (!railTicking) { railTicking = true; requestAnimationFrame(updateRail); }
+  }, { passive: true });
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { layoutRail();  }, 120);
+  });
+  if (railQuery.addEventListener) railQuery.addEventListener("change", layoutRail);
+  // Keyboard users: tabbing to a card scrolls the page so that card is in view.
+  track.addEventListener("focusin", function (e) {
+    if (!root.classList.contains("rail-pinned") || railShift <= 0) return;
+    var card = e.target.closest(".rail-card");
+    if (!card) return;
+    var gutter = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    var p = Math.min(1, Math.max(0, (card.offsetLeft - gutter) / railShift));
+    var top = rail.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: top + p * railTravel(), behavior: "auto" });
+  });
+
+  /* ---------- custom cursor (fine pointers only, never with reduced motion) ----------
+     A ring that trails the real pointer and grows over links and images.
+     The system cursor stays visible, so nothing depends on this. */
+  var cursor = document.getElementById("cursor");
+  var cursorLabel = document.getElementById("cursor-label");
+  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+  var cx = -100, cy = -100, tx = -100, ty = -100, cursorRaf = 0;
+  function cursorOn() { return finePointer.matches && !reduceMotion.matches; }
+  function cursorLoop() {
+    cx += (tx - cx) * 0.22;
+    cy += (ty - cy) * 0.22;
+    cursor.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0)";
+    cursorRaf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.2 ? requestAnimationFrame(cursorLoop) : 0;
+  }
+  function syncCursor() {
+    root.classList.toggle("has-cursor", cursorOn());
+    if (!cursorOn()) cursor.classList.remove("is-visible");
+  }
+  syncCursor();
+  if (finePointer.addEventListener) finePointer.addEventListener("change", syncCursor);
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", syncCursor);
+  document.addEventListener("pointermove", function (e) {
+    if (!cursorOn() || e.pointerType !== "mouse") return;
+    tx = e.clientX; ty = e.clientY;
+    if (!cursor.classList.contains("is-visible")) { cx = tx; cy = ty; cursor.classList.add("is-visible"); }
+    if (!cursorRaf) cursorRaf = requestAnimationFrame(cursorLoop);
+  }, { passive: true });
+  document.addEventListener("pointerover", function (e) {
+    if (!cursorOn() || !e.target.closest) return;
+    var labelled = e.target.closest("[data-cursor]");
+    var media = e.target.closest("img, .hero-stage");
+    var hot = e.target.closest("a, button, label, select, input, textarea, summary");
+    cursor.classList.toggle("is-media", !!labelled || !!media);
+    cursor.classList.toggle("is-link", !labelled && !media && !!hot);
+    cursorLabel.textContent = labelled ? labelled.getAttribute("data-cursor") : "";
+  });
+  document.documentElement.addEventListener("pointerleave", function () { cursor.classList.remove("is-visible"); });
+  document.addEventListener("pointerdown", function () { cursor.classList.add("is-down"); });
+  document.addEventListener("pointerup", function () { cursor.classList.remove("is-down"); });
+
+  /* ---------- project detail view (#/work/<slug>) ----------
+     Uses the View Transitions API where the browser has it, so the card
+     image grows into the page header. Elsewhere the view simply swaps. */
+  var siteTitle = document.title;
+  var homeScroll = 0;
+  var lastSlug = null;
+
+  function routeSlug() {
+    var m = location.hash.match(/^#\/work\/([a-z0-9-]+)\/?$/i);
+    return m ? m[1].toLowerCase() : null;
+  }
+  function findProject(slug) {
+    for (var i = 0; i < projectItems.length; i++) if (projectItems[i].slug === slug) return projectItems[i];
+    return null;
+  }
+  function backIcon() {
+    var svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    var path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", "M10 3.5L5.5 8l4.5 4.5");
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function renderProject(p) {
+    projectView.textContent = "";
+    var facts = el("dl", { className: "pv-facts" });
+    [["Year", p.year], ["Role", p.role], ["Client", p.client], ["Built with", (p.tags || []).join(", ")]].forEach(function (f) {
+      if (f[1]) facts.appendChild(el("div", {}, [el("dt", { text: f[0] }), el("dd", { text: f[1] })]));
+    });
+    var back = el("a", { className: "pv-back", href: "#projects" }, [backIcon(), document.createTextNode("All work")]);
+    var hero = p.image ? el("figure", { className: "pv-hero" }, [el("img", { src: p.image, alt: p.imageAlt || "", width: "960", height: "600" })]) : null;
+    var storyBox = el("div", { className: "pv-story" });
+    (p.story && p.story.length ? p.story : [p.description]).forEach(function (t) { storyBox.appendChild(el("p", { text: t })); });
+    var results = el("ul", { className: "pv-results", "aria-labelledby": "pv-results-title" });
+    (p.results || []).forEach(function (r) {
+      results.appendChild(el("li", {}, [el("span", { className: "pv-result-value", text: r.value }), el("span", { className: "pv-result-label", text: r.label })]));
+    });
+    var resultsBox = results.children.length ? el("div", {}, [el("h2", { className: "pv-results-title", id: "pv-results-title", text: "Results" }), results]) : null;
+    var gallery = el("div", { className: "pv-gallery" });
+    (p.gallery || []).forEach(function (g) {
+      gallery.appendChild(el("figure", { className: "reveal-media" }, [
+        el("div", { className: "reveal-frame" }, [el("img", { src: g.src, alt: g.alt || "", loading: "lazy", width: "960", height: "600" })]),
+        g.caption ? el("figcaption", { text: g.caption }) : null
+      ]));
+    });
+    var links = el("div", { className: "project-links" });
+    if (isSafeUrl(p.live)) links.appendChild(link(p.live, "Live site", "project-link", true));
+    if (isSafeUrl(p.code)) links.appendChild(link(p.code, "Source code", "project-link", true));
+    var next = projectItems[(p._index + 1) % projectItems.length];
+    var nextLink = next && next !== p ? el("a", { className: "pv-next", href: "#/work/" + next.slug, "data-cursor": "Next" }, [
+      el("span", { className: "pv-next-title", text: next.title }),
+      el("span", { className: "pv-next-label", text: "Next project" })
+    ]) : null;
+
+    projectView.appendChild(el("div", { className: "container pv" }, [
+      back,
+      el("header", { className: "pv-head" }, [
+        el("h1", { className: "pv-title", id: "pv-title", tabindex: "-1", text: p.title }),
+        el("p", { className: "pv-lede", text: p.description }),
+        facts
+      ]),
+      hero,
+      el("div", { className: "pv-body" }, [storyBox, resultsBox]),
+      gallery.children.length ? gallery : null,
+      links.children.length ? links : null,
+      nextLink
+    ]));
+    observeReveals(projectView);
+  }
+
+  // Exactly one rendered element may carry the shared transition name at a time.
+  function nameSharedImage(slug) {
+    list.querySelectorAll("img[data-slug]").forEach(function (img) {
+      img.style.viewTransitionName = img.getAttribute("data-slug") === slug ? "project-hero" : "";
+    });
+  }
+  function swapView(update) {
+    if (!document.startViewTransition || reduceMotion.matches) { update(); return; }
+    document.startViewTransition(update);
+  }
+
+  function showRoute(initial) {
+    var slug = routeSlug();
+    var p = slug ? findProject(slug) : null;
+    var fromProject = !projectView.hidden;
+    if (p) {
+      if (!fromProject) homeScroll = window.scrollY;
+      nameSharedImage(p.slug);
+      lastSlug = p.slug;
+      var open = function () {
+        renderProject(p);
+        homeView.hidden = true;
+        projectView.hidden = false;
+        document.title = p.title + " | " + siteTitle;
+        root.classList.add("is-project");
+        layoutRail();
+        window.scrollTo(0, 0);
+        var h = document.getElementById("pv-title");
+        if (h && !initial) h.focus({ preventScroll: true });
+      };
+      if (initial) open(); else swapView(open);
+      return;
+    }
+    if (!fromProject) return; // a normal in-page anchor on the home view: the browser scrolls
+    var hash = location.hash;
+    var target = hash.length > 1 && hash.indexOf("#/") !== 0 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+    nameSharedImage(lastSlug);
+    swapView(function () {
+      projectView.hidden = true;
+      projectView.textContent = "";
+      homeView.hidden = false;
+      document.title = siteTitle;
+      root.classList.remove("is-project");
+      layoutRail();
+      
+      if (hash === "#projects" || hash === "" || hash === "#/") {
+        window.scrollTo(0, homeScroll);
+        var card = lastSlug && list.querySelector('a[href="#/work/' + lastSlug + '"]');
+        if (card) card.focus({ preventScroll: true });
+      } else if (target) {
+        target.scrollIntoView();
+      }
+    });
+  }
+  window.addEventListener("hashchange", function () { showRoute(false); });
+  showRoute(true);
+  layoutRail();
+  window.addEventListener("load", layoutRail);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutRail);
 
   /* ---------- 3D hero (three.js, lazy loaded) ----------
      Only when WebGL works and reduced motion is off. three.js is an ES module,

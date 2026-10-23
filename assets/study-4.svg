@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Study four placeholder">
+  <rect width="800" height="1000" fill="#17565c"/>
+  <g fill="#e9dfd2">
+    <rect x="100" y="140" width="170" height="170" rx="20"/>
+    <rect x="315" y="140" width="170" height="170" rx="85"/>
+    <rect x="530" y="140" width="170" height="170" rx="20" fill="#f2c27b"/>
+    <rect x="100" y="355" width="170" height="170" rx="85" fill="#d9643a"/>
+    <rect x="315" y="355" width="170" height="170" rx="20"/>
+    <rect x="530" y="355" width="170" height="170" rx="85"/>
+    <rect x="100" y="570" width="170" height="170" rx="20"/>
+    <rect x="315" y="570" width="170" height="170" rx="20" fill="#f2c27b"/>
+    <rect x="530" y="570" width="170" height="170" rx="20"/>
+  </g>
+  <rect x="100" y="820" width="380" height="22" rx="6" fill="#e9dfd2"/>
+</svg>

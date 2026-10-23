@@ -1,30 +1,31 @@
 {
   "name": "leo-starter-portfolio",
   "title": "Leo's starter: Portfolio",
-  "description": "A personal portfolio site with a three.js hero, GSAP scroll motion, light and dark themes, and all content in one file.",
-  "version": "1.0.0",
-  "license": "MIT (template code). Vendored GSAP uses the Standard No Charge GSAP License, see NOTICE.md.",
+  "description": "A studio-style personal portfolio: three.js hero, pinned story, a work strip that scrolls sideways, a reveal gallery and a page per project. All content in one file, no build step.",
+  "version": "2.0.0",
+  "license": "MIT (template code). three.js is MIT, fonts are OFL 1.1, Governor is MIT. See NOTICE.md.",
   "author": "Cardzo",
   "stack": [
     "HTML",
     "CSS",
     "JavaScript",
     "three.js 0.186.1",
-    "GSAP 3.15.0 + ScrollTrigger"
+    "Web Animations API, CSS scroll-driven animations, View Transitions (no animation library)"
   ],
   "buildStep": false,
   "entry": "index.html",
   "editFile": "content.js",
   "features": [
-    "Hero, about, selected work, experience timeline, contact and footer sections",
     "3D low-poly hero that reacts to pointer and scroll, lazy loaded, capped pixel ratio, paused off screen",
-    "Static artwork fallback when WebGL is missing, reduced motion is on, or the page is opened from disk",
-    "GSAP intro and ScrollTrigger section motion with a reduced-motion path",
-    "CSS scroll-driven reading progress bar as progressive enhancement",
-    "Light and dark themes that follow the system setting",
-    "Active nav highlight, smooth anchor scrolling, mobile menu",
-    "mailto link and copy-email button, no backend",
-    "Self-hosted fonts, no trackers, no external requests"
+    "Pinned 'how I work' story: the picture swaps as each chapter scrolls past",
+    "Selected work as a pinned strip that scrolls sideways (CSS scroll-driven, with a fallback), swipeable on phones",
+    "A page per project at #/work/<slug> with a View Transitions image hand-off",
+    "Gallery with clip-path reveals on scroll",
+    "Custom cursor on fine pointers only, never with reduced motion",
+    "Experience timeline that fills as you read, mailto link and copy-email button",
+    "Light and dark themes, reduced motion respected, no layout shift",
+    "Self-hosted fonts, no trackers, no external requests",
+    "Governor pre-installed: AI coding guardrails for Claude Code (tier 3)"
   ],
   "demo": {
     "local": "python -m http.server 8000, then open http://localhost:8000",
@@ -32,8 +33,17 @@
     "screenshots": [
       "docs/desktop-light.png",
       "docs/desktop-dark.png",
-      "docs/phone-light.png"
+      "docs/phone-light.png",
+      "docs/desktop-light-work.png",
+      "docs/desktop-light-story.png",
+      "docs/desktop-light-project.png"
     ]
+  },
+  "governor": {
+    "tier": 3,
+    "testCommand": "none",
+    "refresh": "/governor:init",
+    "remove": "/governor:remove"
   },
   "deploy": [
     "GitHub Pages",
