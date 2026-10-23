@@ -82,3 +82,5 @@ listed above.
   "generated look" tells. None of their files are included here.
 - Earlier layout ideas came from MIT portfolio templates cobiwave/simplefolio and
   codewithsadee/vcard-personal-portfolio. No code from them is included.
+
+Third-party files in vendor/ and fonts/ keep their own licences, listed above.
